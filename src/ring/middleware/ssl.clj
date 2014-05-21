@@ -28,13 +28,34 @@
   (or (= method :head)
       (= method :get)))
 
+(defn- request-url
+  "Return the full URL of the request."
+  [request]
+  (str (-> request :scheme name)
+       "://"
+       (:server-name request)
+       (if-let [port (:server-port request)]
+         (if-not (#{80 443} port) (str ":" port)))
+       (:uri request)
+       (if-let [query (:query-string request)]
+         (str "?" query))))
+
 (defn wrap-ssl-redirect
-  "Middleware that redirects any HTTP request to the equivalent HTTPS URL."
-  [handler]
+  "Middleware that redirects any HTTP request to the equivalent HTTPS URL.
+
+  Accepts the following options:
+
+  :ssl-port - the request should be redirected to this port (defaults to the
+              port of the original request)"
+  [handler & [{:as options}]]
   (fn [request]
     (if (= (:scheme request) :https)
       (handler request)
-      (-> (resp/redirect (req/request-url (assoc request :scheme :https)))
+      (-> request
+          (assoc :scheme :https)
+          (assoc :server-port (or (:ssl-port options) (:server-port request)))
+          (request-url)
+          (resp/redirect)
           (resp/status   (if (get-request? request) 301 307))))))
 
 (defn- build-hsts-header
