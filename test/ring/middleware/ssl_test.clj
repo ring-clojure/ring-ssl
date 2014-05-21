@@ -42,7 +42,18 @@
     (testing "HTTPS request"
       (let [response (handler (request :get "https://localhost/"))]
         (is (= (:status response) 200))
-        (is (nil? (get-header response "location")))))))
+        (is (nil? (get-header response "location"))))))
+
+  (let [handler (wrap-ssl-redirect (constantly (response "")) {:ssl-port 8443})]
+    (testing "HTTP GET request with different SSL port"
+      (let [response (handler (request :get "/"))]
+        (is (= (:status response) 301))
+        (is (= (get-header response "location") "https://localhost:8443/"))))
+
+    (testing "HTTP POST request with different SSL port"
+      (let [response (handler (request :post "/"))]
+        (is (= (:status response) 307))
+        (is (= (get-header response "location") "https://localhost:8443/"))))))
 
 (deftest test-wrap-hsts
   (testing "defaults"
