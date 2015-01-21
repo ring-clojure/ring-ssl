@@ -53,7 +53,18 @@
     (testing "HTTP POST request with custom SSL port"
       (let [response (handler (request :post "/"))]
         (is (= (:status response) 307))
-        (is (= (get-header response "location") "https://localhost:8443/"))))))
+        (is (= (get-header response "location") "https://localhost:8443/")))))
+
+  (let [handler (wrap-ssl-redirect (constantly (response "")) {:exempt-paths ["/healthcheck"]})]
+    (testing "HTTP request"
+      (let [response (handler (request :get "/healthcheck"))]
+        (is (= (:status response) 200))
+        (is (nil? (get-header response "location")))))
+
+    (testing "HTTPS request"
+      (let [response (handler (request :get "/healthcheck"))]
+        (is (= (:status response) 200))
+        (is (nil? (get-header response "location")))))))
 
 (deftest test-wrap-hsts
   (testing "defaults"

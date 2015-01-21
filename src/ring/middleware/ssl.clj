@@ -37,11 +37,13 @@
 
   Accepts the following options:
 
-  :ssl-port - the SSL port to use for redirects, defaults to 443."
+  :ssl-port     - the SSL port to use for redirects, defaults to 443.
+  :exempt-paths - A list of paths that should not be redirected."
   {:arglists '([handler] [handler options])}
-  [handler & [{:keys [ssl-port]}]]
+  [handler & [{:keys [ssl-port exempt-paths]}]]
   (fn [request]
-    (if (= (:scheme request) :https)
+    (if (or (= (:scheme request) :https)
+            (and exempt-paths (contains? (set exempt-paths) (:uri request))))
       (handler request)
       (-> (resp/redirect (https-url (req/request-url request) ssl-port))
           (resp/status   (if (get-request? request) 301 307))))))
