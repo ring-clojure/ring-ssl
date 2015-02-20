@@ -20,7 +20,9 @@
      (fn [req]
        (let [header  (str/lower-case header)
              default (name (:scheme req))
-             scheme  (str/lower-case (get-in req [:headers header] default))]
+             scheme  (-> (get-in req [:headers header] default)
+                         (str/split #",")
+                         last str/trim str/lower-case)]
          (assert (or (= scheme "http") (= scheme "https")))
          (handler (assoc req :scheme (keyword scheme)))))))
 

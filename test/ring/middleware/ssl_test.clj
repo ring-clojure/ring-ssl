@@ -19,7 +19,12 @@
           (is (= (:body response) "https")))
         (let [response (handler (-> (request :get "https://localhost/")
                                     (header "x-forwarded-proto" "http")))]
-          (is (= (:body response) "http")))))
+          (is (= (:body response) "http"))))
+
+      (testing "comma separated header"
+        (let [response (handler (-> (request :get "/")
+                                    (header "x-forwarded-proto" "http, https")))]
+          (is (= (:body response) "https")))))
 
     (testing "custom header"
       (let [handler  (wrap-forwarded-scheme handler "X-Foo")
