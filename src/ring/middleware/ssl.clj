@@ -39,7 +39,7 @@
 
   :ssl-port - the SSL port to use for redirects, defaults to 443."
   {:arglists '([handler] [handler options])}
-  [handler & [{:keys [ssl-port]}]]
+  [handler & {:keys [ssl-port]}]
   (fn [request]
     (if (= (:scheme request) :https)
       (handler request)
