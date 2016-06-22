@@ -33,7 +33,17 @@
       (let [response (handler (request :get "/"))]
         (is (= (:status response) 301))
         (is (= (get-header response "location") "https://localhost/"))))
-    
+
+    (testing "HTTP GET request (with query params)"
+      (let [response (handler (request :get "/" {:foo "bar"}))]
+        (is (= (:status response) 301))
+        (is (= (get-header response "location") "https://localhost/?foo=bar"))))
+
+    (testing "HTTP GET request (non-standard port)"
+      (let [response (handler (request :get "http://localhost:8080/"))]
+        (is (= (:status response) 301))
+        (is (= (get-header response "location") "https://localhost/"))))
+
     (testing "HTTP POST request"
       (let [response (handler (request :post "/"))]
         (is (= (:status response) 307))
@@ -42,11 +52,31 @@
     (testing "HTTPS request"
       (let [response (handler (request :get "https://localhost/"))]
         (is (= (:status response) 200))
+        (is (nil? (get-header response "location")))))
+
+    (testing "HTTPS request (non-standard port)"
+      (let [response (handler (request :get "https://localhost:8443/"))]
+        (is (= (:status response) 200))
+        (is (nil? (get-header response "location")))))
+
+    (testing "WS request"
+      (let [response (handler (request :get "ws://localhost/"))]
+        (is (= (:status response) 301))
+        (is (= (get-header response "location") "wss://localhost/"))))
+
+    (testing "WSS request"
+      (let [response (handler (request :get "wss://localhost/"))]
+        (is (= (:status response) 200))
         (is (nil? (get-header response "location"))))))
 
   (let [handler (wrap-ssl-redirect (constantly (response "")) {:ssl-port 8443})]
     (testing "HTTP GET request with custom SSL port"
       (let [response (handler (request :get "/"))]
+        (is (= (:status response) 301))
+        (is (= (get-header response "location") "https://localhost:8443/"))))
+
+    (testing "HTTP GET request (non-standard port) with custom SSL port"
+      (let [response (handler (request :get "http://localhost:8080/"))]
         (is (= (:status response) 301))
         (is (= (get-header response "location") "https://localhost:8443/"))))
 

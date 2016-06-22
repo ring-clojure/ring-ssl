@@ -1,7 +1,6 @@
 (ns ring.middleware.ssl
   "Middleware for managing handlers operating over HTTPS."
   (:require [ring.util.response :as resp]
-            [ring.util.request :as req]
             [clojure.string :as str]))
 
 (def default-scheme-header
@@ -21,16 +20,31 @@
        (let [header  (str/lower-case header)
              default (name (:scheme req))
              scheme  (str/lower-case (get-in req [:headers header] default))]
-         (assert (or (= scheme "http") (= scheme "https")))
+         (assert (contains? #{"http" "https" "ws" "wss"} scheme))
          (handler (assoc req :scheme (keyword scheme)))))))
 
 (defn- get-request? [{method :request-method}]
   (or (= method :head)
       (= method :get)))
 
-(defn- https-url [url-string port]
-  (let [url (java.net.URL. url-string)]
-    (str (java.net.URL. "https" (.getHost url) (or port -1) (.getFile url)))))
+(defn- secure-request? [{scheme :scheme}]
+  (or (= scheme :https)
+      (= scheme :wss)))
+
+(defn- secure-url [{:keys [query-string scheme]
+                    :as   request}
+                   port]
+  {:pre [(or (= :http scheme) (= :ws scheme))]}
+  (str (name scheme)
+       "s://"
+       (-> (get-in request [:headers "host"])
+         (str/split #":")
+         (first))
+       (when port
+         (str ":" port))
+       (:uri request)
+       (when query-string
+         (str "?" query-string))))
 
 (defn wrap-ssl-redirect
   "Middleware that redirects any HTTP request to the equivalent HTTPS URL.
@@ -41,9 +55,9 @@
   {:arglists '([handler] [handler options])}
   [handler & [{:keys [ssl-port]}]]
   (fn [request]
-    (if (= (:scheme request) :https)
+    (if (secure-request? request)
       (handler request)
-      (-> (resp/redirect (https-url (req/request-url request) ssl-port))
+      (-> (resp/redirect (secure-url request ssl-port))
           (resp/status   (if (get-request? request) 301 307))))))
 
 (defn- build-hsts-header
