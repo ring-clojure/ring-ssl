@@ -3,7 +3,7 @@
   :url "https://github.com/ring-clojure/ring-ssl"
   :license {:name "The MIT License"
             :url "http://opensource.org/licenses/MIT"}
-  :dependencies [[org.clojure/clojure "1.5.1"]
+  :dependencies [[org.clojure/clojure "1.9.0"]
                  [ring/ring-core "1.6.0"]]
   :plugins [[lein-codox "0.10.3"]]
   :codox {:project {:name "Ring-SSL"}
