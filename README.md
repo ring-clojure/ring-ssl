@@ -22,10 +22,9 @@ Add the following dependency to your `project.clj`:
 ## Thanks
 
 This project was originally conceived and developed by [James
-Conroy-Finn][2] at [Listora][3].
+Conroy-Finn][2].
 
 [2]: http://jamesconroyfinn.com/
-[3]: http://www.listora.com/
 
 ## License
 
