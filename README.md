@@ -1,6 +1,4 @@
-# Ring-SSL
-
-[![Build Status](https://secure.travis-ci.org/ring-clojure/ring-ssl.png)](http://travis-ci.org/ring-clojure/ring-ssl)
+# Ring-SSL [![Build Status](https://github.com/ring-clojure/ring-ssl/actions/workflows/test.yml/badge.svg)](https://github.com/ring-clojure/ring-ssl/actions/workflows/test.yml)
 
 Ring middleware for managing HTTPS requests.
 
