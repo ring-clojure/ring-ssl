@@ -29,6 +29,6 @@ Conroy-Finn][2] at [Listora][3].
 
 ## License
 
-Copyright © 2017 James Conroy-Finn, James Reeves
+Copyright © 2024 James Conroy-Finn, James Reeves
 
 Released under the MIT license, same as Ring.
